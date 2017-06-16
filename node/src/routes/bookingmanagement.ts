@@ -1,95 +1,134 @@
 import { Request, Response, Router as eRouter } from 'express';
-import * as bussiness from '../logic';
+import * as business from '../logic';
 import * as types from '../model/interfaces';
 import * as moment from 'moment';
 import { validEmail } from '../utils/utilFunctions';
-import {lowerCase} from 'lodash';
+import { lowerCase } from 'lodash';
 
 export const router = eRouter();
 
-router.post('/v1/booking', (req: any, res: Response) => {
-    // check if param is correct
-    if (!types.isBookingView(req.body)) {
-        res.status(400).json({ message: 'Parser data error' });
-    } else if (!moment(req.body.date).isValid() || moment(req.body.date).diff(moment().add(1, 'hour')) < 0) {
+router.post('/v1/booking', (req: types.CustomRequest, res: Response) => {
+    try {
+        // Check errors at petiton
+        if (!types.isBookingPostView(req.body)) {
+            throw { code: 400, message: 'Parser data error' };
+        }
+
         // check if date is future
-        res.status(400).json({ message: 'Given date must be future' });
-    } else if (!validEmail(req.body.email)) {
-        res.status(400).json({ message: 'Invalid email' });
-    } else if (req.body.type.index === types.BookingTypes.invited && (req.body.guestList === undefined || req.body.guestList.length === 0)) {
-        res.status(400).json({ message: 'You need to invite someone' });
-    } else if (req.body.type.index === types.BookingTypes.invited &&
-        (req.body.guestList as string[]).map((elem: any): boolean => {
-            return !validEmail(elem);
-        }).reduce((elem1: boolean, elem2: boolean) => {
-            return elem1 || elem2;
-        })) {
-        res.status(400).json({ message: 'Invalid invitation email' });
-    } else {
-        bussiness.createBooking(req.body, req.tableCron, (err: types.IError | null, resToken?: string) => {
-            if (err) {
-                res.status(500).json({ message: err.message });
+        if (!moment(req.body.booking.bookingDate).isValid() || moment(req.body.booking.bookingDate).diff(moment().add(1, 'hour')) < 0) {
+            throw { code: 400, message: 'Given date must be future' };
+        }
+
+        // check if valid email is given
+        if (!validEmail(req.body.booking.email as string)) {
+            throw { code: 400, message: 'Invalid email' };
+        }
+
+        if (req.body.booking.bookingType === types.BookingTypes.booking && req.body.booking.assistants! < 1) {
+            throw { code: 400, message: 'Assistants must be a number greater than 1' };
+        }
+
+        // if bookingType = 1 property invitedGuest must be defined
+        if (req.body.booking.bookingType === types.BookingTypes.invited && (req.body.invitedGuests === undefined || req.body.invitedGuests.length === 0)) {
+            throw { message: 'You need to invite someone' };
+        }
+
+        // if bookingType = 1 all invitedGuest email must be valid
+        if (req.body.booking.bookingType === types.BookingTypes.invited &&
+            (req.body.invitedGuests as types.InvitedGuestEntity[]).map((elem): boolean => {
+                return !validEmail(elem.email);
+            }).reduce((elem1: boolean, elem2: boolean) => {
+                return elem1 || elem2;
+            })) {
+            throw { code: 400, message: 'Invalid invitation email' };
+        }
+
+        // if no errors, create booking
+        business.createBooking(req.body, req.tableCron, (error: types.Error | null, resToken?: string): void => {
+            if (error) {
+                res.status(error.code || 500).json({ message: error.message });
             } else {
-                // TODO: send emails to all
+                console.log(resToken);
                 res.status(201).json(resToken);
             }
-        });
+        }, req.user);
+    } catch (err) {
+        res.status(err.code || 500).json({ message: err.message });
     }
 });
 
-router.get('/v1/invitedguest', (req: Request, res: Response) => {
-    if (req.query.guestToken === undefined || req.query.guestResponse === undefined) {
-        res.status(400).json({ message: 'Invalid petition' });
-    } else {
-        req.query.guestResponse = lowerCase(req.query.guestResponse) === 'true';
-        bussiness.updateInvitation(req.query.guestToken, req.query.guestResponse, (err: types.IError) => {
+router.get('/v1/invitedguest/accept/:token', (req: Request, res: Response) => {
+    try {
+        // the token must be defined
+        if (req.params.token === undefined) {
+            throw { code: 400, message: 'Invalid petition' };
+        }
+
+        business.updateInvitation(req.params.token, true, (err: types.Error) => {
             if (err) {
-                res.status(err.code).json(err.message);
+                res.status(err.code || 500).json(err.message);
             } else {
                 res.status(204).json();
             }
         });
+    } catch (err) {
+        res.status(err.code || 500).json({ message: err.message });
     }
 });
 
-router.get('/v1/booking/cancelinvited', (req: Request, res: Response) => {
-    if (req.query.reservationToken === undefined) {
-        res.status(400).json({ message: 'No booking token given' });
-    } else {
-        bussiness.cancelInvitation(req.query.reservationToken, (err: types.IError) => {
+router.get('/v1/invitedguest/decline/:token', (req: Request, res: Response) => {
+    try {
+        // the token must be defined
+        if (req.params.token === undefined) {
+            throw { code: 400, message: 'Invalid petition' };
+        }
+
+        business.updateInvitation(req.params.token, false, (err: types.Error) => {
             if (err) {
-                res.status(err.code).json(err.message);
+                res.status(err.code || 500).json(err.message);
             } else {
                 res.status(204).json();
             }
         });
+    } catch (err) {
+        res.status(err.code || 500).json({ message: err.message });
     }
 });
 
-// router.post('/v1/booking/search', (req: Request, res: Response) => {
-//     if (req.query.reservationToken === undefined) {
-//         res.status(400).json({ message: 'No booking token given' });
-//     } else {
-//         bussiness.searchBooking(req.query.reservationToken, (err: types.IError) => {
-//             if (err) {
-//                 res.status(err.code).json(err.message);
-//             } else {
-//                 res.status(204).json();
-//             }
-//         });
-//     }
-// });
+router.get('/v1/booking/cancel/:token', (req: types.CustomRequest, res: Response) => {
+    try {
+        // the token must be defined
+        if (req.params.token === undefined) {
+            throw { code: 400, message: 'Invalid petition' };
+        }
 
-router.post('/v1/booking/:id', (req: Request, res: Response) => {
-    if (req.params.id === undefined) {
-        res.status(400).json({ message: 'No booking token given' });
-    } else {
-        bussiness.getBookingById(req.params.id, (err: types.IError, booking?: types.IBookingView) => {
+        business.cancelBooking(req.params.token, req.tableCron, (err: types.Error | null) => {
             if (err) {
-                res.status(err.code).json(err.message);
+                res.status(err.code || 500).json(err.message);
             } else {
-                res.status(200).json(booking);
+                res.status(204).json();
             }
         });
+    } catch (err) {
+        res.status(err.code || 500).json({ message: err.message });
+    }
+});
+
+router.post('/v1/booking/search', (req: Request, res: Response) => {
+    try {
+        // body content must be SearchCriteria
+        if (!types.isSearchCriteria(req.body)) {
+            throw {code: 400, message: 'No booking token given' };
+        }
+
+        business.searchBooking(req.body, (err: types.Error | null, bookingEntity: types.PaginatedList) => {
+            if (err) {
+                res.status(err.code || 500).json(err.message);
+            } else {
+                res.json(bookingEntity);
+            }
+        });
+    } catch (err) {
+        res.status(err.code || 500).json({ message: err.message });
     }
 });

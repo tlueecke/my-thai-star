@@ -1,8 +1,9 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { IPageChangeEvent, ITdDataTableColumn, TdDataTableService } from '@covalent/core';
-import { ReservationCockpitService } from '../shared/reservation-cockpit.service';
 import { FriendsInvite, ReservationView } from '../../../shared/viewModels/interfaces';
-import {MD_DIALOG_DATA} from '@angular/material';
+import { WaiterCockpitService } from '../../shared/waiter-cockpit.service';
+import { MD_DIALOG_DATA } from '@angular/material';
+import { config } from '../../../config';
 
 @Component({
   selector: 'cockpit-reservation-dialog',
@@ -14,7 +15,6 @@ export class ReservationDialogComponent implements OnInit {
   data: any;
 
   datat: ReservationView[] = [];
-
   columnst: ITdDataTableColumn[] = [
     { name: 'booking.bookingDate', label: 'Reservation date'},
     { name: 'booking.creationDate', label: 'Creation date'},
@@ -24,11 +24,12 @@ export class ReservationDialogComponent implements OnInit {
   ];
 
   datao: FriendsInvite[] = [];
-
   columnso: ITdDataTableColumn[] = [
     { name: 'email', label: 'Guest email'},
     { name: 'accepted', label: 'Acceptances and declines'},
   ];
+
+  pageSizes: number[] = config.pageSizes;
 
   fromRow: number = 1;
   currentPage: number = 1;
@@ -36,7 +37,7 @@ export class ReservationDialogComponent implements OnInit {
   filteredData: any[] = this.datao;
 
   constructor(private _dataTableService: TdDataTableService,
-              private reservationCockpitService: ReservationCockpitService,
+              private waiterCockpitService: WaiterCockpitService,
               @Inject(MD_DIALOG_DATA) dialogData: any) {
                  this.data = dialogData.row;
   }
@@ -44,7 +45,7 @@ export class ReservationDialogComponent implements OnInit {
   ngOnInit(): void {
     this.datat.push(this.data);
     this.datao = this.data.invitedGuests;
-    if ( this.data.invitedGuests.length === 0 ) {
+    if (this.data.booking.assistants) {
       this.columnst.push({ name: 'booking.assistants', label: 'Assistants'});
     }
     this.filter();

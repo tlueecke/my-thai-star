@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import ChaiHttp = require('chai-http');
 import { app as server } from '../src/app';
-import { isDishView } from '../src/model/interfaces';
+import { isDishesView } from '../src/model/interfaces';
 import * as _ from 'lodash';
 
 // configure chai-http
@@ -11,10 +11,11 @@ const expect = chai.expect;
 const should = chai.should();
 
 describe('Get dishes', () => {
-    describe('POST /mythaistar/services/rest/Dishmanagement/v1/Dish/Search empty body', () => {
+    describe('POST /mythaistar/services/rest/dishmanagement/v1/dish/search empty body', () => {
         it('should respond with all dishes', (done) => {
             chai.request(server)
-                .post('/mythaistar/services/rest/Dishmanagement/v1/Dish/Search')
+                .post('/mythaistar/services/rest/Dishmanagement/v1/dish/search')
+                .send({categories: [], sortBy: []})
                 .end((err, res) => {
                     // there should be no errors
                     should.not.exist(err);
@@ -23,24 +24,25 @@ describe('Get dishes', () => {
                     // the response should be JSON
                     expect(res).to.be.json;
 
-                    expect(res.body instanceof Array).to.be.true;
-                    res.body.forEach((elem: any) => {
-                        expect(isDishView(elem)).to.be.true;
+                    expect(res.body.result instanceof Array).to.be.true;
+
+                    res.body.result.forEach((elem: any) => {
+                        expect(isDishesView(elem)).to.be.true;
                     });
 
-                    res.body.length.should.be.equal(10);
+                    res.body.result.length.should.be.equal(6);
                     done();
                 });
         });
     });
 
-    describe('POST /mythaistar/services/rest/Dishmanagement/v1/Dish/Search with filter', () => {
+    describe('POST /mythaistar/services/rest/dishmanagement/v1/dish/search with filter', () => {
         it('dishes must contain the word "curry"', (done) => {
             chai.request(server)
-                .post('/mythaistar/services/rest/Dishmanagement/v1/Dish/Search')
+                .post('/mythaistar/services/rest/dishmanagement/v1/dish/search')
                 .send({ // FilterView
-                    categories: null,
-                    maxPrice: 10,
+                    categories: [],
+                    maxPrice: null,
                     minLikes: null,
                     searchBy: 'curry',
                     isFab: false,
@@ -53,15 +55,15 @@ describe('Get dishes', () => {
                     // the response should be JSON
                     expect(res).to.be.json;
 
-                    expect(res.body instanceof Array).to.be.true;
-                    res.body.forEach((elem: any) => {
-                        expect(isDishView(elem)).to.be.true;
+                    expect(res.body.result instanceof Array).to.be.true;
+                    res.body.result.forEach((elem: any) => {
+                        expect(isDishesView(elem)).to.be.true;
 
-                        expect(_.lowerCase(elem.name).includes('curry') ||
-                               _.lowerCase(elem.description).includes('curry')).to.be.true;
+                        expect(_.lowerCase(elem.dish.name).includes('curry') ||
+                               _.lowerCase(elem.dish.description).includes('curry')).to.be.true;
                     });
 
-                    res.body.length.should.be.equal(4);
+                    res.body.result.length.should.be.equal(1);
                     done();
                 });
         });

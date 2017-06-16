@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -31,6 +32,7 @@ import io.oasp.application.mtsj.dishmanagement.logic.api.Dishmanagement;
 import io.oasp.application.mtsj.dishmanagement.logic.api.to.DishCto;
 import io.oasp.application.mtsj.dishmanagement.logic.api.to.DishEto;
 import io.oasp.application.mtsj.dishmanagement.logic.api.to.IngredientEto;
+import io.oasp.application.mtsj.general.common.api.constants.Roles;
 import io.oasp.application.mtsj.general.logic.base.AbstractComponentFacade;
 import io.oasp.application.mtsj.mailservice.api.Mail;
 import io.oasp.application.mtsj.ordermanagement.common.api.exception.CancelNotAllowedException;
@@ -116,6 +118,12 @@ public class OrdermanagementImpl extends AbstractComponentFacade implements Orde
     return cto;
   }
 
+  @RolesAllowed(Roles.WAITER)
+  public PaginatedListTo<OrderCto> findOrdersByPost(OrderSearchCriteriaTo criteria) {
+
+    return findOrderCtos(criteria);
+  }
+
   @Override
   public PaginatedListTo<OrderCto> findOrderCtos(OrderSearchCriteriaTo criteria) {
 
@@ -145,26 +153,35 @@ public class OrdermanagementImpl extends AbstractComponentFacade implements Orde
   }
 
   @Override
+  @RolesAllowed(Roles.WAITER)
   public PaginatedListTo<OrderCto> filterOrderCtos(OrderFilterCriteria filter) {
 
     OrderSearchCriteriaTo emtpyCriteria = new OrderSearchCriteriaTo();
     PaginatedListTo<OrderCto> ordersCto = findOrderCtos(emtpyCriteria);
     List<OrderCto> ctos = new ArrayList<>();
     if (filter.getEmail() != null) {
-      for (OrderCto cto : ordersCto.getResult()) {
-        if (cto.getInvitedGuest() != null) {
-          if (cto.getInvitedGuest().getEmail().equals(filter.getEmail())) {
-            ctos.add(cto);
+      if (!filter.getEmail().isEmpty()) {
+        for (OrderCto cto : ordersCto.getResult()) {
+          if (cto.getInvitedGuest() != null) {
+            if (cto.getInvitedGuest().getEmail().equals(filter.getEmail())) {
+              ctos.add(cto);
+              continue;
+            }
           }
-        } else if (cto.getBooking() != null) {
-          if (cto.getBooking().getEmail().equals(filter.getEmail())) {
-            ctos.add(cto);
+          if (cto.getBooking() != null) {
+            if (cto.getBooking().getEmail().equals(filter.getEmail())) {
+              ctos.add(cto);
+              continue;
+            }
           }
-        } else if (cto.getHost() != null) {
-          if (cto.getHost().getEmail().equals(filter.getEmail())) {
-            ctos.add(cto);
+          if (cto.getHost() != null) {
+            if (cto.getHost().getEmail().equals(filter.getEmail())) {
+              ctos.add(cto);
+            }
           }
         }
+      } else {
+        ctos = ordersCto.getResult();
       }
     } else {
       ctos = ordersCto.getResult();
@@ -172,10 +189,12 @@ public class OrdermanagementImpl extends AbstractComponentFacade implements Orde
 
     if (filter.getBookingToken() != null) {
 
-      for (Iterator<OrderCto> i = ctos.iterator(); i.hasNext();) {
-        OrderCto cto = i.next();
-        if (!cto.getBooking().getBookingToken().equals(filter.getBookingToken())) {
-          i.remove();
+      if (!filter.getBookingToken().isEmpty()) {
+        for (Iterator<OrderCto> i = ctos.iterator(); i.hasNext();) {
+          OrderCto cto = i.next();
+          if (!cto.getBooking().getBookingToken().equals(filter.getBookingToken())) {
+            i.remove();
+          }
         }
       }
     }

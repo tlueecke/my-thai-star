@@ -1,0 +1,10 @@
+version: '2'
+services:
+  client_compose:
+    build: "angular"
+    ports:
+      - "8091:80"
+  server_compose:
+    build: "java"
+    ports:
+      - "9091:8080"

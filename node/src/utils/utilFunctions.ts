@@ -80,7 +80,7 @@ export function objectToArray(object: any) {
     return res;
 }
 
-export function getPagination(pageSize: number, page: number, list: any[]): types.IPaginatedList {
+export function getPagination(pageSize: number, page: number, list: any[]): types.PaginatedList {
     if (page > Math.ceil(list.length / pageSize)) {
         return {
             pagination: {
@@ -102,4 +102,46 @@ export function getPagination(pageSize: number, page: number, list: any[]): type
         },
         result: _.slice(list, ini, end),
     };
+}
+
+export interface TypeDefinition {
+    [propName: string]: ['required' | 'optional', string | ((elem: any) => boolean)];
+}
+
+export function checkType(a: TypeDefinition, a2: any) {
+    for (const aux in a) {
+        if (a.hasOwnProperty(aux)) {
+            if (a[aux][0] === 'required') {
+                if (!a2.hasOwnProperty(aux)) {
+                    return false;
+                }
+
+                if (typeof a[aux][1] === 'string') {
+                    if (a[aux][1] === 'array') {
+                        if (!(a2[aux] instanceof Array)) {
+                            return false;
+                        }
+                    } else if (typeof a2[aux] !== a[aux][1]) {
+                        return false;
+                    }
+                }  else {
+                    if (!(a[aux][1] as ((elem: any) => boolean))(a2[aux])) return false;
+                }
+            } else if (a2.hasOwnProperty(aux)) {
+                if (typeof a[aux][1] === 'string') {
+                   if (a[aux][1] === 'array') {
+                        if (!(a2[aux] instanceof Array)) {
+                            return false;
+                        }
+                    } else if (typeof a2[aux] !== a[aux][1]) {
+                        return false;
+                    }
+                } else {
+                    if (!(a[aux][1] as ((elem: any) => boolean))(a2[aux])) return false;
+                }
+            }
+        }
+    }
+
+    return true;
 }

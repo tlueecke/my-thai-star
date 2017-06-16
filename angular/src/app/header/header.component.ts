@@ -1,11 +1,14 @@
 import { Component, Output, EventEmitter } from '@angular/core';
+import { MdDialog, MdDialogRef } from '@angular/material';
 import { Router } from '@angular/router';
 import { FormGroup } from '@angular/forms';
-import { ComponentType, MdDialog, MdDialogRef } from '@angular/material';
-import { LoginDialogComponent } from '../user-area/login-dialog/login-dialog.component';
-import { SidenavService } from '../sidenav/shared/sidenav.service';
-import { WindowService } from '../shared/windowService/windowService.service';
+
 import { AuthService } from '../shared/authentication/auth.service';
+import { SidenavService } from '../sidenav/shared/sidenav.service';
+import { UserAreaService } from '../user-area/shared/user-area.service';
+import { WindowService } from '../shared/windowService/windowService.service';
+
+import { LoginDialogComponent } from '../user-area/login-dialog/login-dialog.component';
 import { PasswordDialogComponent } from '../user-area/password-dialog/password-dialog.component';
 import { TwitterDialogComponent } from '../user-area/twitter-dialog/twitter-dialog.component';
 
@@ -22,11 +25,10 @@ export class HeaderComponent {
               public router: Router,
               public sidenav: SidenavService,
               public dialog: MdDialog,
-              public auth: AuthService) {
+              public auth: AuthService,
+              public userService: UserAreaService) {
   }
 
-  // Remark: There should be just one method - openCloseSideNav. Why is there a mobile and normal side nav?
-  // Why each one is handled in a different way? (via events and via service)
   openCloseSideNav(sidenavOpened: boolean): void {
     sidenavOpened ? this.sidenav.closeSideNav() : this.sidenav.openSideNav();
   }
@@ -47,9 +49,9 @@ export class HeaderComponent {
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         if (result.email) {
-          this.auth.register(result.email, result.password);
+          this.userService.register(result.email, result.password);
         } else {
-          this.auth.login(result.username, result.password);
+          this.userService.login(result.username, result.password);
         }
       }
     });
@@ -68,7 +70,7 @@ export class HeaderComponent {
   }
 
   logout(): void {
-    this.auth.logout();
+    this.userService.logout();
     this.router.navigate(['restaurant']);
   }
 }
