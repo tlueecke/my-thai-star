@@ -85,6 +85,9 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
   @Inject
   private Mail mailService;
 
+  /**
+   * Optional listeners to be notified of changes to the invitations
+   */
   // Optional dependencies seem not to be supported by JSR-330
   @Autowired(required = false)
   private List<InvitationListener> listeners;

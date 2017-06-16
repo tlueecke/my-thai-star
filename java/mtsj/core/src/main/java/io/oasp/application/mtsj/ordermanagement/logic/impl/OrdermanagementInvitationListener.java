@@ -11,8 +11,7 @@ import io.oasp.application.mtsj.ordermanagement.logic.api.to.OrderCto;
 import io.oasp.application.mtsj.ordermanagement.logic.api.to.OrderSearchCriteriaTo;
 
 /**
- * Implementation of the {@link InvitationListener} purging the orders when the corresponding invited guest does not
- * come.
+ * Implementation of the {@link InvitationListener} deleting orders when the corresponding invited guest does not come.
  */
 @Named
 public class OrdermanagementInvitationListener implements InvitationListener {
