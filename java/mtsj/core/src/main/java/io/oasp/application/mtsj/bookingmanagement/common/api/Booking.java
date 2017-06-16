@@ -47,10 +47,6 @@ public interface Booking extends ApplicationEntity {
 
   public void setTableId(Long tableId);
 
-  public Long getOrderId();
-
-  public void setOrderId(Long orderId);
-
   public Integer getAssistants();
 
   public void setAssistants(Integer assistants);

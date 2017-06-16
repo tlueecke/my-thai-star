@@ -28,8 +28,6 @@ public class InvitedGuestEntity extends ApplicationPersistenceEntity implements 
 
   private Timestamp modificationDate;
 
-  private OrderEntity order;
-
   private static final long serialVersionUID = 1L;
 
   public InvitedGuestEntity() {
@@ -139,24 +137,6 @@ public class InvitedGuestEntity extends ApplicationPersistenceEntity implements 
       bookingEntity.setId(bookingId);
       this.booking = bookingEntity;
     }
-  }
-
-  /**
-   * @return order
-   */
-  @OneToOne
-  @JoinColumn(name = "idOrder")
-  public OrderEntity getOrder() {
-
-    return this.order;
-  }
-
-  /**
-   * @param order new value of {@link #getorder}.
-   */
-  public void setOrder(OrderEntity order) {
-
-    this.order = order;
   }
 
 }

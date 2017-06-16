@@ -17,6 +17,7 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,13 +36,10 @@ import io.oasp.application.mtsj.bookingmanagement.logic.api.to.InvitedGuestEto;
 import io.oasp.application.mtsj.bookingmanagement.logic.api.to.InvitedGuestSearchCriteriaTo;
 import io.oasp.application.mtsj.bookingmanagement.logic.api.to.TableEto;
 import io.oasp.application.mtsj.bookingmanagement.logic.api.to.TableSearchCriteriaTo;
+import io.oasp.application.mtsj.bookingmanagement.logic.base.InvitationListener;
 import io.oasp.application.mtsj.general.common.api.constants.Roles;
 import io.oasp.application.mtsj.general.logic.base.AbstractComponentFacade;
 import io.oasp.application.mtsj.mailservice.api.Mail;
-import io.oasp.application.mtsj.ordermanagement.logic.api.Ordermanagement;
-import io.oasp.application.mtsj.ordermanagement.logic.api.to.OrderCto;
-import io.oasp.application.mtsj.ordermanagement.logic.api.to.OrderEto;
-import io.oasp.application.mtsj.ordermanagement.logic.api.to.OrderSearchCriteriaTo;
 import io.oasp.application.mtsj.usermanagement.logic.api.to.UserEto;
 import io.oasp.module.jpa.common.api.to.PaginatedListTo;
 
@@ -85,10 +83,11 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
   private TableDao tableDao;
 
   @Inject
-  private Ordermanagement orderManagement;
-
-  @Inject
   private Mail mailService;
+
+  // Optional dependencies seem not to be supported by JSR-330
+  @Autowired(required = false)
+  private List<InvitationListener> listeners;
 
   /**
    * The constructor.
@@ -106,9 +105,7 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
     BookingCto cto = new BookingCto();
     cto.setBooking(getBeanMapper().map(entity, BookingEto.class));
     cto.setTable(getBeanMapper().map(entity.getTable(), TableEto.class));
-    cto.setOrder(getBeanMapper().map(entity.getOrder(), OrderEto.class));
     cto.setInvitedGuests(getBeanMapper().mapList(entity.getInvitedGuests(), InvitedGuestEto.class));
-    cto.setOrders(getBeanMapper().mapList(entity.getOrders(), OrderEto.class));
     return cto;
   }
 
@@ -129,10 +126,8 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
       BookingCto cto = new BookingCto();
       cto.setBooking(getBeanMapper().map(entity, BookingEto.class));
       cto.setInvitedGuests(getBeanMapper().mapList(entity.getInvitedGuests(), InvitedGuestEto.class));
-      cto.setOrder(getBeanMapper().map(entity.getOrder(), OrderEto.class));
       cto.setTable(getBeanMapper().map(entity.getTable(), TableEto.class));
       cto.setUser(getBeanMapper().map(entity.getUser(), UserEto.class));
-      cto.setOrders(getBeanMapper().mapList(entity.getOrders(), OrderEto.class));
       ctos.add(cto);
 
     }
@@ -141,16 +136,6 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
 
   @Override
   public boolean deleteBooking(Long bookingId) {
-
-    OrderSearchCriteriaTo criteria = new OrderSearchCriteriaTo();
-    criteria.setBookingId(bookingId);
-    List<OrderCto> bookingOrders = this.orderManagement.findOrderCtos(criteria).getResult();
-    for (OrderCto orderCto : bookingOrders) {
-      boolean deleteOrderResult = this.orderManagement.deleteOrder(orderCto.getOrder().getId());
-      if (deleteOrderResult) {
-        LOG.debug("The order with id '{}' has been deleted.", orderCto.getOrder().getId());
-      }
-    }
 
     BookingEntity booking = getBookingDao().find(bookingId);
     getBookingDao().delete(booking);
@@ -251,13 +236,8 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
   @Override
   public boolean deleteInvitedGuest(Long invitedGuestId) {
 
+    notifyListeners(invitedGuestId);
     InvitedGuestEntity invitedGuest = getInvitedGuestDao().find(invitedGuestId);
-    OrderSearchCriteriaTo criteria = new OrderSearchCriteriaTo();
-    criteria.setHostToken(invitedGuest.getBooking().getBookingToken());
-    List<OrderCto> guestOrdersCto = this.orderManagement.findOrderCtos(criteria).getResult();
-    for (OrderCto orderCto : guestOrdersCto) {
-      this.orderManagement.deleteOrder(orderCto.getOrder().getId());
-    }
     getInvitedGuestDao().delete(invitedGuest);
     LOG.debug("The invitedGuest with id '{}' has been deleted.", invitedGuestId);
     return true;
@@ -323,6 +303,7 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
     return getBeanMapper().map(resultEntity, TableEto.class);
   }
 
+  @Override
   public InvitedGuestEto acceptInvite(String guestToken) {
 
     Objects.requireNonNull(guestToken);
@@ -343,18 +324,12 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
     InvitedGuestSearchCriteriaTo criteria = new InvitedGuestSearchCriteriaTo();
     criteria.setGuestToken(guestToken);
     InvitedGuestEto invited = findInvitedGuestEtos(criteria).getResult().get(0);
-    InvitedGuestEntity invitedEntity = getInvitedGuestDao().findOne(invited.getId());
     invited.setAccepted(false);
 
-    OrderSearchCriteriaTo guestOrderCriteria = new OrderSearchCriteriaTo();
-    guestOrderCriteria.setInvitedGuestId(invitedEntity.getId());
-    List<OrderCto> guestOrdersCto = this.orderManagement.findOrderCtos(guestOrderCriteria).getResult();
-    for (OrderCto orderCto : guestOrdersCto) {
-      this.orderManagement.deleteOrder(orderCto.getOrder().getId());
-    }
     BookingCto booking = findBooking(invited.getBookingId());
     sendConfirmationActionToHost(booking, invited, "declined");
     sendDeclineConfirmationToGuest(booking, invited);
+    notifyListeners(invited.getId());
     return saveInvitedGuest(invited);
   }
 
@@ -564,6 +539,13 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
     Long now = Timestamp.from(Instant.now()).getTime();
 
     return (now > cancellationLimit) ? false : true;
+  }
+
+  private void notifyListeners(Long invitedGuestId) {
+
+    for (InvitationListener listener : this.listeners) {
+      listener.invitationDeletedOrDeclined(invitedGuestId);
+    }
   }
 
 }

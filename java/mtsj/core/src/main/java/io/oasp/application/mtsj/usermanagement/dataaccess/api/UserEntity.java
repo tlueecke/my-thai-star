@@ -9,11 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import io.oasp.application.mtsj.bookingmanagement.dataaccess.api.BookingEntity;
 import io.oasp.application.mtsj.dishmanagement.dataaccess.api.DishEntity;
 import io.oasp.application.mtsj.general.dataaccess.api.ApplicationPersistenceEntity;
 import io.oasp.application.mtsj.usermanagement.common.api.User;
@@ -29,8 +27,6 @@ public class UserEntity extends ApplicationPersistenceEntity implements User {
   private String email;
 
   private UserRoleEntity userRole;
-
-  private List<BookingEntity> bookings;
 
   private List<DishEntity> favourites;
 
@@ -126,23 +122,6 @@ public class UserEntity extends ApplicationPersistenceEntity implements User {
   public void setFavourites(List<DishEntity> favourites) {
 
     this.favourites = favourites;
-  }
-
-  /**
-   * @return bookings
-   */
-  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-  public List<BookingEntity> getBookings() {
-
-    return this.bookings;
-  }
-
-  /**
-   * @param bookings new value of {@link #getbookings}.
-   */
-  public void setBookings(List<BookingEntity> bookings) {
-
-    this.bookings = bookings;
   }
 
   @Override

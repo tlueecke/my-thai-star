@@ -14,6 +14,8 @@ import io.oasp.module.jpa.common.api.to.PaginatedListTo;
 
 /**
  * Interface for Bookingmanagement component.
+ * REVIEW this interface handles multiple concerns (Bookings, Tables, Invited Guests) consider using the alternative
+ * design for Logic APIs splitting it into several UC.
  */
 public interface Bookingmanagement {
 

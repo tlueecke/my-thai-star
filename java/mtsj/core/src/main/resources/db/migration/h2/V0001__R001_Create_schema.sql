@@ -50,7 +50,6 @@ CREATE TABLE Booking (
   canceled BOOLEAN NOT NULL DEFAULT ((0)) ,
   bookingType INTEGER,
   idTable BIGINT,
-  idOrder BIGINT,
   assistants INTEGER,
   CONSTRAINT PK_Booking PRIMARY KEY(id),
   CONSTRAINT FK_Booking_idUser FOREIGN KEY(idUser) REFERENCES User(id) NOCHECK,
@@ -66,7 +65,6 @@ CREATE TABLE InvitedGuest (
   email VARCHAR (60),
   accepted BOOLEAN,
   modificationDate TIMESTAMP,
-  idOrder BIGINT,
   CONSTRAINT PK_InvitedGuest PRIMARY KEY(id),
   CONSTRAINT FK_InvitedGuest_idBooking FOREIGN KEY(idBooking) REFERENCES Booking(id) NOCHECK
 );
@@ -124,7 +122,7 @@ CREATE TABLE DishCategory (
   idCategory BIGINT NOT NULL,
   CONSTRAINT PK_DishCategory PRIMARY KEY(id),
   CONSTRAINT FK_DishCategory_idDish FOREIGN KEY(idDish) REFERENCES Dish(id) NOCHECK,
-  CONSTRAINT FK_DishCategory_idCategory FOREIGN KEY(idCategory) REFERENCES Category(id) NOCHECK  
+  CONSTRAINT FK_DishCategory_idCategory FOREIGN KEY(idCategory) REFERENCES Category(id) NOCHECK
 );
 
 -- *** Ingredient ***

@@ -14,7 +14,7 @@
   <description>Core of the server for the mtsj application - a simple example using the Open Application Standard Platform for Java (OASP4J).</description>
 
   <properties>
-    <java.version>1.8</java.version>
+    <java.version>1.7</java.version>
   </properties>
 
   <dependencies>
@@ -237,7 +237,7 @@
       <artifactId>spring-boot-starter-security</artifactId>
       <version>1.5.2.RELEASE</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-mail</artifactId>
@@ -272,7 +272,7 @@
       <version>1.3.0</version>
     <scope>test</scope>
     </dependency>
-	
+
 	<!-- Uncomment the following dependency if the database used is MariaDB 10.0.27 -->
     <!--
       <dependency>

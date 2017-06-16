@@ -17,8 +17,6 @@ public class UserCto extends AbstractCto {
 
   private UserRoleEto userRole;
 
-  private List<BookingEto> bookings;
-
   private List<DishEto> favourites;
 
   public UserEto getUser() {
@@ -39,16 +37,6 @@ public class UserCto extends AbstractCto {
   public void setUserRole(UserRoleEto userRole) {
 
     this.userRole = userRole;
-  }
-
-  public List<BookingEto> getBookings() {
-
-    return bookings;
-  }
-
-  public void setBookings(List<BookingEto> bookings) {
-
-    this.bookings = bookings;
   }
 
   public List<DishEto> getFavourites() {
