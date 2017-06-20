@@ -1,7 +1,11 @@
+process.env.MODE = 'test';
+process.env.PORT = 9980;
+
 import * as chai from 'chai';
 import * as _ from 'lodash';
 import * as business from '../src/logic';
 import * as types from '../src/model/interfaces';
+import * as config from '../src/config';
 
 const expect = chai.expect;
 const should = chai.should();
@@ -70,6 +74,9 @@ describe('Testing the application logic', () => {
     });
 
     let fbookingToken: string;
+    let nbookingToken: string;
+    let fbookingId: string;
+    let fguestToken: string;
 
     describe('createBooking', () => {
         it('should return a booking token', (done) => {
@@ -99,7 +106,7 @@ describe('Testing the application logic', () => {
             };
 
             business.createBooking(b1, (err, bookingToken) => {
-
+                nbookingToken = bookingToken!;
             });
 
             business.createBooking(b2, (err, bookingToken) => {
@@ -138,11 +145,9 @@ describe('Testing the application logic', () => {
     describe('getAllInvitedBookings', () => {
         it('should return all bookings if no date is given', (done) => {
             business.getAllInvitedBookings().then((bookings) => {
-                console.log(bookings);
                 expect(bookings).to.be.instanceof(Array);
 
                 expect(bookings.length).to.be.equals(1);
-                console.log(fbookingToken);
                 expect(bookings[0].bookingToken).to.be.equals(fbookingToken);
 
                 done();
@@ -150,7 +155,7 @@ describe('Testing the application logic', () => {
         });
 
         it('should return only some bookings when a date is given', (done) => {
-             business.getAllInvitedBookings('2030-06-16T10:30:00.000Z').then((bookings) => {
+            business.getAllInvitedBookings('2030-06-16T10:30:00.000Z').then((bookings) => {
                 expect(bookings).to.be.instanceof(Array);
 
                 expect(bookings.length).to.be.equals(1);
@@ -165,6 +170,16 @@ describe('Testing the application logic', () => {
                 expect(bookings).to.be.instanceof(Array);
 
                 expect(bookings.length).to.be.equals(0);
+                done();
+            });
+        });
+    });
+
+    describe('updateBookingWithTable', () => {
+        it('should add the table to the booking', (done) => {
+            business.updateBookingWithTable(fbookingId, '0').catch((err) => { should.not.exist(err); }).then((elem) => {
+                expect(elem).to.be.false;
+
                 done();
             });
         });
@@ -203,6 +218,8 @@ describe('Testing the application logic', () => {
             business.searchBooking(search, (err, bookings) => {
                 should.not.exist(err);
 
+                fguestToken = ((bookings!.result[0] as types.BookingPostView).invitedGuests![0].guestToken)!;
+                fbookingId = (bookings!.result[0] as types.BookingPostView).booking.id!.toString();
                 expect(bookings!.result).to.not.be.undefined;
                 expect(bookings!.result.length).to.be.equals(1);
 
@@ -231,8 +248,85 @@ describe('Testing the application logic', () => {
         });
     });
 
+    describe('updateInvitation', () => {
+        it('should change the InvitedGuest accepted to true if the response is true', (done) => {
+            business.updateInvitation(fguestToken, true, (err) => {
+                should.not.exist(err);
+
+                done();
+            });
+        });
+
+        it('should return a error when the invitation is already accepted', (done) => {
+            business.updateInvitation(fguestToken, true, (err) => {
+                should.exist(err);
+
+                done();
+            });
+        });
+
+        it('should cancel the InvitedGuest if the response is false', (done) => {
+            business.updateInvitation(fguestToken, false, (err) => {
+                should.not.exist(err);
+
+                done();
+            });
+        });
+
+        it('should return an error if the InvitedGuest is already canceled', (done) => {
+            business.updateInvitation(fguestToken, false, (err) => {
+                should.exist(err);
+
+                done();
+            });
+        });
+    });
+
+    describe('getAssistantsForInvitedBooking', () => {
+        it('should return the number of accepted InvitedGuest', (done) => {
+            business.getAssistansForInvitedBooking(fbookingId).catch((err) => {
+                should.not.exist(err);
+
+                done(err);
+            }).then((assistants) => {
+                expect(assistants).to.be.equal(1);
+
+                done();
+            });
+        });
+    });
+
+    describe('cancelBooking', () => {
+        it('should cancel a booking with guests', (done) => {
+            business.cancelBooking(fbookingToken, (err) => {
+                should.not.exist(err);
+
+                done();
+            });
+        });
+
+        it('should return an error if a invalid token is given', (done) => {
+            business.cancelBooking('INVALID_TOKEN', (err) => {
+                should.exist(err);
+
+                done();
+            });
+        });
+
+        it('should return an error if the token do not correspond to a booking with guest', (done) => {
+            business.cancelBooking(nbookingToken, (err) => {
+                should.exist(err);
+
+                done();
+            });
+        });
+    });
+
     after(() => {
         // delete console.log;
         // delete console.error;
+
+        process.env.MODE = undefined;
+        process.env.PORT = undefined;
     });
 });
