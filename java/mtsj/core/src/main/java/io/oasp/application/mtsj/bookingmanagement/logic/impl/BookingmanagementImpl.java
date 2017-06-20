@@ -57,14 +57,11 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
    */
   private static final Logger LOG = LoggerFactory.getLogger(BookingmanagementImpl.class);
 
-  @Value("${client.port}")
-  private int clientPort;
-
-  @Value("${server.context-path}")
-  private String serverContextPath;
-
   @Value("${mythaistar.hourslimitcancellation}")
   private int hoursLimit;
+
+  @Value("${server.baseurl}")
+  private String baseUrl;
 
   /**
    * @see #getBookingDao()
@@ -427,9 +424,9 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
           .append("\n");
       invitedMailContent.append("Booking Date: ").append(booking.getBookingDate()).append("\n");
 
-      String linkAccept = "http://localhost:" + this.clientPort + "/booking/acceptInvite/" + guest.getGuestToken();
+      String linkAccept = this.baseUrl + "/booking/acceptInvite/" + guest.getGuestToken();
 
-      String linkDecline = "http://localhost:" + this.clientPort + "/booking/rejectInvite/" + guest.getGuestToken();
+      String linkDecline = this.baseUrl + "/booking/rejectInvite/" + guest.getGuestToken();
 
       invitedMailContent.append("To accept: ").append(linkAccept).append("\n");
       invitedMailContent.append("To decline: ").append(linkDecline).append("\n");
@@ -458,7 +455,7 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
           hostMailContent.append("-").append(guest.getEmail()).append("\n");
         }
       }
-      String cancellationLink = "http://localhost:" + this.clientPort + "/booking/cancel/" + booking.getBookingToken();
+      String cancellationLink = this.baseUrl + "/booking/cancel/" + booking.getBookingToken();
       hostMailContent.append(cancellationLink).append("\n");
       this.mailService.sendMail(booking.getEmail(), "Booking confirmation", hostMailContent.toString());
     } catch (Exception e) {
@@ -478,8 +475,7 @@ public class BookingmanagementImpl extends AbstractComponentFacade implements Bo
       guestMailContent.append("Guest CODE: ").append(guest.getGuestToken()).append("\n");
       guestMailContent.append("Booking Date: ").append(booking.getBooking().getBookingDate()).append("\n");
 
-      String cancellationLink =
-          "http://localhost:" + this.clientPort + "/booking/rejectInvite/" + guest.getGuestToken();
+      String cancellationLink = this.baseUrl + "/booking/rejectInvite/" + guest.getGuestToken();
 
       guestMailContent.append("To cancel invite: ").append(cancellationLink).append("\n");
       this.mailService.sendMail(guest.getEmail(), "Invite accepted", guestMailContent.toString());

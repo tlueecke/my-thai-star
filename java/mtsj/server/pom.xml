@@ -16,6 +16,7 @@
   <properties>
       <java.version>1.7</java.version>
       <server.war.name>mythaistar</server.war.name>
+      <js.client.dir>../../../angular</js.client.dir>
   </properties>
 
   <dependencies>
@@ -30,7 +31,6 @@
     <profile>
       <id>jsclient</id>
       <activation>
-        <!--<activeByDefault>true</activeByDefault>-->
         <activeByDefault>false</activeByDefault>
       </activation>
       <build>
@@ -40,57 +40,16 @@
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>npm-install</id>
-                <phase>generate-sources</phase>
+                <id>ng-build</id>
+                <phase>generate-resources</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>npm</executable>
+                  <executable>ng</executable>
                   <arguments>
-                    <argument>install</argument>
-                  </arguments>
-                  <workingDirectory>${js.client.dir}</workingDirectory>
-                </configuration>
-              </execution>
-              <execution>
-                <id>gulp-clean</id>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>gulp</executable>
-                  <arguments>
-                    <argument>clean</argument>
-                  </arguments>
-                  <workingDirectory>${js.client.dir}</workingDirectory>
-                </configuration>
-              </execution>
-              <execution>
-                <id>gulp-build</id>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>gulp</executable>
-                  <arguments>
-                    <argument>build:dist</argument>
-                  </arguments>
-                  <workingDirectory>${js.client.dir}</workingDirectory>
-                </configuration>
-              </execution>
-              <execution>
-                <id>gulp-test</id>
-                <phase>test</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>gulp</executable>
-                  <arguments>
-                    <argument>test</argument>
+                    <argument>build</argument>
+                    <argument>--base-href=/${server.war.name}/</argument>
                   </arguments>
                   <workingDirectory>${js.client.dir}</workingDirectory>
                 </configuration>

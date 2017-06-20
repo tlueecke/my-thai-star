@@ -56,12 +56,18 @@ public abstract class BaseWebSecurityConfig extends WebSecurityConfigurerAdapter
   @Override
   public void configure(HttpSecurity http) throws Exception {
 
-    String[] unsecuredResources = new String[] { "/login", "/security/**", "/services/rest/login",
-    "/services/rest/logout", "/services/rest/dishmanagement/**", "/services/rest/imagemanagement/**",
-    "/services/rest/ordermanagement/v1/order", "/services/rest/bookingmanagement/v1/booking",
-    "/services/rest/bookingmanagement/v1/booking/cancel/**",
+    String[] unsecuredResources = new String[] {
+    // Contains the static resources (jsclient, etc.)
+    "/*", "/assets/**",
+    // security urls
+    "/login", "/security/**", "/services/rest/login", "/services/rest/logout",
+    // public rest services
+    "/services/rest/dishmanagement/**", "/services/rest/imagemanagement/**", "/services/rest/ordermanagement/v1/order",
+    "/services/rest/bookingmanagement/v1/booking", "/services/rest/bookingmanagement/v1/booking/cancel/**",
     "/services/rest/bookingmanagement/v1/invitedguest/accept/**",
-    "/services/rest/bookingmanagement/v1/invitedguest/decline/**" };
+    "/services/rest/bookingmanagement/v1/invitedguest/decline/**",
+    // sub-paths for the angular booking module
+    "/booking/**" };
 
     http.userDetailsService(this.userDetailsService).csrf().disable().exceptionHandling().and().sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()

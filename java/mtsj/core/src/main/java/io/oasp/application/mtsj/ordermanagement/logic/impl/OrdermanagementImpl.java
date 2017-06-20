@@ -87,11 +87,8 @@ public class OrdermanagementImpl extends AbstractComponentFacade implements Orde
   @Inject
   private Mail mailService;
 
-  @Value("${client.port}")
-  private int clientPort;
-
-  @Value("${server.context-path}")
-  private String serverContextPath;
+  @Value("${server.baseurl}")
+  private String baseUrl;
 
   @Value("${mythaistar.hourslimitcancellation}")
   private int hoursLimit;
@@ -118,6 +115,7 @@ public class OrdermanagementImpl extends AbstractComponentFacade implements Orde
     return cto;
   }
 
+  @Override
   @RolesAllowed(Roles.WAITER)
   public PaginatedListTo<OrderCto> findOrdersByPost(OrderSearchCriteriaTo criteria) {
 
@@ -407,7 +405,7 @@ public class OrdermanagementImpl extends AbstractComponentFacade implements Orde
       mailContent.append("Your order has been created.").append("\n");
       mailContent.append(getContentFormatedWithCost(order)).append("\n");
       mailContent.append("\n").append("Link to cancel order: ");
-      String link = "http://localhost:" + this.clientPort + "/booking/cancelOrder/" + order.getId();
+      String link = this.baseUrl + "/booking/cancelOrder/" + order.getId();
       mailContent.append(link);
       this.mailService.sendMail(emailTo, "Order confirmation", mailContent.toString());
     } catch (Exception e) {
