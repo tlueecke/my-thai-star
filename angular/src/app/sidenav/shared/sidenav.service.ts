@@ -10,6 +10,8 @@ const isOrderEqual: Function =
    (orderToFind: OrderView) => (o: OrderView) => o.dish.name === orderToFind.dish.name && isEqual(o.extras, orderToFind.extras);
 
 @Injectable()
+// REVIEW this should be named from a functional perspective not how it is represented. 
+// Suggested: OrderService
 export class SidenavService {
 
   opened: boolean = false;

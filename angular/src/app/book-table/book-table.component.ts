@@ -24,6 +24,7 @@ export class BookTableComponent {
               public bookingService: BookTableService) {
   }
 
+  // REVIEW use databinding instead and pass bound object as data
   showBookTableDialog(form: FormGroup): void {
     let dialogRef: MdDialogRef<BookTableDialogComponent> = this.dialog.open(BookTableDialogComponent, {
       width: this.window.responsiveWidth(),
@@ -31,6 +32,7 @@ export class BookTableComponent {
     });
   }
 
+  // REVIEW use databinding instead and pass bound object as data
   showInviteDialog(form: FormGroup): void {
     let dialogRef: MdDialogRef<InvitationDialogComponent> = this.dialog.open(InvitationDialogComponent, {
       width: this.window.responsiveWidth(),

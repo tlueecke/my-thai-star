@@ -1,6 +1,13 @@
 import { TdDataTableSortingOrder } from '@covalent/core';
 // FILTERS
 
+// REVIEW General remark: why did we introduce differently named transfer structures here?
+// Even if we might not have been able to generate them with CobiGen, the naming should be the same correct?
+// My guess is that this is due to developing the client separately first, but this makes the
+// code hard to follow since one has to look at all the details to catch the complete information flow
+// from client to server
+
+// REVIEW I would rename this to MenuFilter so it is more specifed and makes clear what it is for
 export class Filter {
     pagination?: Pagination;
     isFav: boolean;
@@ -11,6 +18,7 @@ export class Filter {
     categories: [{ id: string }];
 }
 
+// REVIEW I would name this BookingFilter
 export class FilterCockpit {
     pagination?: Pagination;
     sort?: Sorting[];
@@ -48,6 +56,7 @@ export class ReservationInfo {
     bookingDate: string;
     name: string;
     email: string;
+    // REVIEW is this needed anywhere? Can't find reading references for it...
     bookingType: number;
     assistants?: number;
 }

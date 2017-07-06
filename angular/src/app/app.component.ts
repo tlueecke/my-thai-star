@@ -11,6 +11,7 @@ import { AuthService } from './shared/authentication/auth.service';
 export class AppComponent {
 
   mobileSidenavOpened: boolean = false;
+  // REVIEW why do we declare these as public? Is there a specific reason for it?
   constructor(public router: Router,
               public sidenav: SidenavService,
               public auth: AuthService) {

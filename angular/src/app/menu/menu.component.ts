@@ -32,6 +32,7 @@ export class MenuComponent implements OnInit {
       this.sortDirIcon = (this.sortDirIcon === 'vertical_align_bottom') ? 'vertical_align_top' : 'vertical_align_bottom';
     }
 
+    // REVIEW databinding
     applyFilters(filters: any): void {
       this.menuService.getDishes(this.menuService.composeFilters(filters, this.sortDir))
                       .subscribe((data: DishView[]) => {

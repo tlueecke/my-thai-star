@@ -55,6 +55,8 @@ public interface Bookingmanagement {
    * @param booking the {@link BookingEto} to create.
    * @return the new {@link BookingEto} that has been saved with ID and version.
    */
+  // REVIEW this method signature promises more than it does. It only makes a booking using some of the data
+  // provided in the BookingCto. Shouldn't we make the API more specific than this?
   BookingEto saveBooking(BookingCto booking);
 
   /**

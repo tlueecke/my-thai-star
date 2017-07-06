@@ -8,6 +8,7 @@ import { Validator, AbstractControl } from '@angular/forms';
         { provide: NG_VALIDATORS, useExisting: forwardRef(() => EmailValidatorDirective), multi: true },
     ],
 })
+// REVIEW should be declared by a CoreModule not in a business module
 export class EmailValidatorDirective implements Validator {
 
     validate(c: AbstractControl): { [key: string]: any } {

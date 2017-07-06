@@ -5,11 +5,13 @@ import { CovalentModule } from '../shared/covalent.module';
 
 import { HomeComponent } from './home.component';
 
+
+// REVIEW redundant import declarations like below can be found in several modules. We should check all modules importing the shared module for this.
 @NgModule({
   imports: [
-    CommonModule,
+    CommonModule, // REVIEW should not be needed since we import shared CovalentModule already
     CovalentModule,
-    MaterialModule,
+    MaterialModule, // REVIEW should not be needed since we import shared CovalentModule already
   ],
   providers: [
   ],

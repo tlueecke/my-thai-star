@@ -19,5 +19,6 @@ const routes: Routes = [
   { path: 'booking/cancel/:token', component: EmailConfirmationsComponent},
   { path: 'booking/cancelOrder/:token', component: EmailConfirmationsComponent},
   { path: '**', redirectTo: '/restaurant', pathMatch: 'full' }];
-
+// REVIEW we should stick to the best practice for routing modules, as defined by angular:
+// https://angular.io/guide/ngmodule#app-routing  
 export const appRoutes: ModuleWithProviders = RouterModule.forRoot(routes);
