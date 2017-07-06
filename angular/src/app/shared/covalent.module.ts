@@ -28,5 +28,7 @@ import { MaterialModule } from '@angular/material';
   declarations: [],
   providers: [],
 })
-
+// REVIEW my guess is that this is used as a shared module as defined by Angular best practices.
+// Should we not rename it as such then (e.g. at least SharedCovalentModule)
+// https://angular.io/guide/ngmodule#shared-modules
 export class CovalentModule { }

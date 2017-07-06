@@ -10,7 +10,10 @@ import * as moment from 'moment';
   styleUrls: ['./book-table-dialog.component.scss'],
 })
 export class BookTableDialogComponent implements OnInit {
-
+  
+  // REVIEW why are we still not using databinding to concrete classes? Such declarations require redundant compose methods in services and 
+  // do not leverage the full feature set of angular. I am sure there is a reason we don't do this since Bartek already remarked on this
+  // and it is not yet changed, but a commment why this is done would be really helpful
   data: any;
   date: string;
 

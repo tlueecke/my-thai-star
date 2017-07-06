@@ -43,6 +43,7 @@ export interface FriendsInvite {
     accepted: boolean;
 }
 
+// REVIEW i find OrderView a little confusing, why not simply OrderLineView?
 export interface OrderView {
     dish: {
         id: number;
