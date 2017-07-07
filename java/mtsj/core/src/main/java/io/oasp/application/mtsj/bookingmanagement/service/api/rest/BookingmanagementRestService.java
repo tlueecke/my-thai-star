@@ -45,6 +45,11 @@ public interface BookingmanagementRestService {
    */
   @POST
   @Path("/booking/")
+  /**
+   *
+   * @param booking
+   * @return
+   */
   public BookingEto saveBooking(BookingCto booking);
 
   /**
