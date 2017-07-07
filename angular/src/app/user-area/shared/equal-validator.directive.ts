@@ -11,6 +11,7 @@ export class EqualValidatorDirective implements Validator {
 
     @Input('validateEqual') public validateEqual: string;
     // reverse property is to check if both fields are equal not matter which one is modified first
+    // REVIEW: shouldn't this be public?
     @Input('reverse') public reverse: string;
 
     validate(control: AbstractControl): { [key: string]: any } {
