@@ -13,8 +13,9 @@ import com.devonfw.application.mtsj.general.common.api.to.UserDetailsClientTo;
 import com.devonfw.application.mtsj.general.security.TokenAuthenticationService;
 
 /**
- * The security REST service provides access to the csrf token, the authenticated user's meta-data. Furthermore, it
- * provides functionality to check permissions and roles of the authenticated user.
+ * The security REST service provides access to the csrf token, the
+ * authenticated user's meta-data. Furthermore, it provides functionality to
+ * check permissions and roles of the authenticated user.
  *
  */
 @Path("/security/v1")
@@ -22,18 +23,19 @@ import com.devonfw.application.mtsj.general.security.TokenAuthenticationService;
 @Transactional
 public class SecurityRestServiceImpl {
 
-  /**
-   * Returns the user details from the jwt token included in the 'Authorization' header
-   *
-   * @param request {@link HttpServletRequest} to retrieve the token
-   * @return the user details {@link UserDetailsClientTo}
-   */
-  @Produces(MediaType.APPLICATION_JSON)
-  @GET
-  @Path("/currentuser/")
-  public UserDetailsClientTo getCurrentUserDetails(@Context HttpServletRequest request) {
+	/**
+	 * Returns the user details from the jwt token included in the 'Authorization'
+	 * header
+	 *
+	 * @param request {@link HttpServletRequest} to retrieve the token
+	 * @return the user details {@link UserDetailsClientTo}
+	 */
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	@Path("/currentuser/")
+	public UserDetailsClientTo getCurrentUserDetails(@Context HttpServletRequest request) {
 
-    return TokenAuthenticationService.getUserdetailsFromToken(request.getHeader("Authorization"));
-  }
+		return TokenAuthenticationService.getUserdetailsFromToken(request.getHeader("Authorization"));
+	}
 
 }

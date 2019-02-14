@@ -1,3 +1,5 @@
+import { CSRFService } from './csrf.service';
+import { CSRFInterceptor } from './csrf.interceptor';
 import { environment } from '../environments/environment';
 import { ConfigModule } from './core/config/config.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -17,7 +19,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { ElectronService } from './shared/electron/electron.service';
 import { WebviewDirective } from './shared/directives/webview.directive';
@@ -53,7 +55,13 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
       enabled: environment.production,
     }),
   ],
-  providers: [ElectronService],
+  providers: [ElectronService,
+    {
+    provide: HTTP_INTERCEPTORS,
+    useClass: CSRFInterceptor,
+    deps: [CSRFService],
+    multi: true
+}],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -8,11 +8,10 @@ import javax.sql.DataSource;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
-@Component
-@Profile("cloud")
+//s. comment in TenantIdentifierResolver
+//@Component
+//@Profile("cloud")
 public class SchemaPerTenantConnectionProvider implements MultiTenantConnectionProvider {
 
 	private static final long serialVersionUID = 2634126769726865523L;

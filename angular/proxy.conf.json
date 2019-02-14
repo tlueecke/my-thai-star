@@ -1,6 +1,6 @@
 {
-  "/v1": {
-    "target": "http://localhost:8000",
+  "/mythaistar/services/*": {
+    "target": "http://localhost:8081",
     "secure": false
   },
   "/graphql": {

@@ -18,8 +18,17 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 @Profile("cloud")
 public class SecurityConfig extends ResourceServerConfigurerAdapter {
 
+	private static final String[] UNSECURED_RESOURCES = new String[] { "/login", "/security/**", "/services/rest/login",
+			"/services/rest/logout", "/services/rest/dishmanagement/**", "/services/rest/imagemanagement/**",
+			"/services/rest/ordermanagement/v1/order", "/services/rest/bookingmanagement/v1/booking",
+			"/services/rest/bookingmanagement/v1/booking/cancel/**",
+			"/services/rest/bookingmanagement/v1/invitedguest/accept/**",
+			"/services/rest/bookingmanagement/v1/invitedguest/decline/**",
+			"/services/rest/ordermanagement/v1/order/cancelorder/**" };
+
 	@Override
 	public void configure(final HttpSecurity httpSecurity) throws Exception {
+
 		// http://docs.spring.io/spring-security/oauth/apidocs/org/springframework/security/oauth2/provider/expression/OAuth2SecurityExpressionMethods.html
 		final String hasGuestScope = "#oauth2.hasScopeMatching('MTS(\\S)+\\.Guest')";
 
@@ -38,6 +47,20 @@ public class SecurityConfig extends ResourceServerConfigurerAdapter {
 				.antMatchers("/api/**").access(hasGuestScope)
 				// permit everything else
 				.anyRequest().permitAll();
+
+//		httpSecurity
+//				// .userDetailsService(this.userDetailsService)
+//				.csrf().disable().exceptionHandling().and().sessionManagement()
+//				.sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().antMatchers("**")
+//				.permitAll().antMatchers(HttpMethod.POST, "/login").permitAll()
+//				.anyRequest().authenticated()
+//				.and()
+		// the api/login requests are filtered with the JWTLoginFilter
+//				.addFilterBefore(new JWTLoginFilter("/login", authenticationManager()),
+//						UsernamePasswordAuthenticationFilter.class)
+		// other requests are filtered to check the presence of JWT in header
+//				.addFilterBefore(new JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+		;
 	}
 
 	@Bean

@@ -1,7 +1,5 @@
-<?xml version='1.0' encoding='utf-8'?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -16,6 +14,14 @@
 		<artifactId>mtss4sdk</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<js.client.dir>../../angular</js.client.dir>
+		<frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+		<node.version>v8.9.4</node.version>
+		<npm.version>5.6.0</npm.version>
+	</properties>
 
 	<dependencies>
 
@@ -248,7 +254,7 @@
 							<!-- Note: A random salt is auto-generated once the project is built 
 								for the first time. Please keep the generated salt in the POM file, for example, 
 								when pushing to git. To learn more, visit: https://blogs.sap.com/2018/10/23/usage-analytics-s4sdk/ -->
-							<salt />
+							<salt>bac4e466a91da1944504e24eda28ed09cb2d41f06afa0d0b3ff16830de22d47e</salt>
 						</configuration>
 					</execution>
 				</executions>
@@ -281,7 +287,23 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.github.eirslett</groupId>
+										<artifactId>frontend-maven-plugin</artifactId>
+										<versionRange>
+											[${frontend-maven-plugin.version},)
+										</versionRange>
+										<goals>
+											<goal>install-node-and-npm</goal>
+											<goal>npm</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -290,5 +312,122 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${js.client.dir}/dist</directory>
+				<targetPath>static</targetPath>
+			</resource>
+		</resources>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>jsclient</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.eirslett</groupId>
+						<artifactId>frontend-maven-plugin</artifactId>
+						<version>${frontend-maven-plugin.version}</version>
+						<configuration>
+							<nodeVersion>${node.version}</nodeVersion>
+							<npmVersion>${npm.version}</npmVersion>
+							<npmInheritsProxyConfigFromMaven>false</npmInheritsProxyConfigFromMaven>
+							<yarnInheritsProxyConfigFromMaven>false</yarnInheritsProxyConfigFromMaven>
+							<workingDirectory>${js.client.dir}</workingDirectory>
+						</configuration>
+						<executions>
+							<execution>
+								<id>install node and npm</id>
+								<goals>
+									<goal>install-node-and-npm</goal>
+								</goals>
+								<configuration>
+									<nodeVersion>${node.version}</nodeVersion>
+									<npmVersion>${npm.version}</npmVersion>
+								</configuration>
+							</execution>
+							<execution>
+								<id>npm install</id>
+								<goals>
+									<goal>npm</goal>
+								</goals>
+								<!-- Optional configuration which provides for running any npm command -->
+								<configuration>
+									<arguments>install</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>npm run build</id>
+								<goals>
+									<goal>npm</goal>
+								</goals>
+								<configuration>
+									<arguments>run build:prodscp</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Filtering the src/main/client/dist/index.html to set the current 
+						version and build timestamp as meta tags in the HTML document head. Technically, 
+						a copy of index.html has to be created: first the file is filtered and copied 
+						to target/client and then copied to src/main/client/dist overwriting the 
+						previous version. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>filter-index.html</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<useDefaultDelimiters>true</useDefaultDelimiters>
+									<outputDirectory>${project.build.directory}/client</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${js.client.dir}/dist</directory>
+											<filtering>true</filtering>
+											<includes>
+												<include>index.html</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
+
+								<id>copy-index.html</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${js.client.dir}/dist</outputDirectory>
+									<overwrite>true</overwrite>
+									<resources>
+										<resource>
+											<directory>${project.build.directory}/client</directory>
+											<filtering>false</filtering>
+											<includes>
+												<include>index.html</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

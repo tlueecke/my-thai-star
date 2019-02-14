@@ -2,14 +2,14 @@ package com.devonfw.application.mtss4sdk.general.config;
 
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import com.sap.cloud.sdk.cloudplatform.logging.CloudLoggerFactory;
 import com.sap.cloud.sdk.cloudplatform.tenant.TenantAccessor;
 import com.sap.cloud.sdk.cloudplatform.tenant.exception.TenantNotAvailableException;
 
-@Component
+// Seems not compatible with com.devonfw.module.jpa.dataaccess.impl.data.GenericRepositoryFactoryBean.createRepositoryFactory(EntityManager)
+// would require creating the repository factories within a RequestContextExecutor!
+//@Component
 public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver {
 	private static final Logger logger = CloudLoggerFactory.getLogger(TenantIdentifierResolver.class);
 
